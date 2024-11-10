@@ -14,7 +14,20 @@ import database from './config/database';
       load: [configuration, database],
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: database,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      name: 'default',
+
+      useFactory: async (configService: ConfigService) => ({
+        ...(await configService.get('database')),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+
+      dataSourceFactory: async (options) => {
+        const dataSource = await new DataSource(options).initialize();
+        return dataSource;
+      },
     }),
   ],
   controllers: [AppController],
