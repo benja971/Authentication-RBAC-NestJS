@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashingService } from 'src/hashing/hashing.service';
 import { Repository } from 'typeorm';
@@ -10,7 +9,6 @@ import { User } from './entities/user.entity';
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(
-    private readonly configService: ConfigService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly hashingService: HashingService,
@@ -25,5 +23,10 @@ export class UsersService {
 
     this.logger.verbose(`Saving user: ${user.email}`);
     return this.usersRepository.save(user);
+  }
+
+  async findOneByEmail(email: string) {
+    this.logger.verbose(`Finding user by email: ${email}`);
+    return this.usersRepository.findOne({ where: { email } });
   }
 }

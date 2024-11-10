@@ -13,4 +13,8 @@ export class HashingService {
 
     return bcrypt.hash(data, salt);
   }
+
+  async compare(data: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(data, hash);
+  }
 }
