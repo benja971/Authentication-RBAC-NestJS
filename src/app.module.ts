@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
 import database from './config/database';
+import { UsersModule } from './users/users.module';
 import { HashingModule } from './hashing/hashing.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { HashingModule } from './hashing/hashing.module';
         return dataSource;
       },
     }),
+    UsersModule,
     HashingModule,
   ],
   controllers: [AppController],
