@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './config/configuration';
 import database from './config/database';
+import { HashingModule } from './hashing/hashing.module';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import database from './config/database';
         return dataSource;
       },
     }),
+    HashingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
