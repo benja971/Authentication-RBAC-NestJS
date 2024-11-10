@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: fullstack-auth-db
+    environment:
+      POSTGRES_USER: benjamin
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: fullstack-auth
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  node-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node-app
+    env_file:
+      - .env
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres-db
+    networks:
+      - backend
+
+volumes:
+  postgres-data:
+
+networks:
+  backend:
