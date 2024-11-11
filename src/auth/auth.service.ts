@@ -1,4 +1,10 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { HashingService } from 'src/hashing/hashing.service';
 import { UsersService } from 'src/users/users.service';
 import { LoginUserDto } from './dto/login-auth.dto';
@@ -10,13 +16,24 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly hashingService: HashingService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
     this.logger.log(`Registering user with email: ${registerUserDto.email}`);
-    const user = await this.usersService.create(registerUserDto);
 
-    return user;
+    const [error, user] = await this.usersService.create(registerUserDto);
+
+    if (error) {
+      throw new ForbiddenException();
+    }
+
+    return {
+      access_token: await this.jwtService.signAsync({
+        id: user.id,
+        email: user.email,
+      }),
+    };
   }
 
   async login(registerUserDto: LoginUserDto) {
@@ -35,6 +52,11 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return result;
+    return {
+      access_token: await this.jwtService.signAsync({
+        id: result.id,
+        email: result.email,
+      }),
+    };
   }
 }

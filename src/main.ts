@@ -13,7 +13,11 @@ async function bootstrap() {
     .setTitle('Fullstack auth')
     .setVersion('1.0')
     .addTag('auth')
-    .addBearerAuth()
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    })
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
