@@ -10,7 +10,7 @@ import database from './config/database';
 import jwt from './config/jwt';
 import { HashingModule } from './hashing/hashing.module';
 import { RolesModule } from './roles/roles.module';
-import { TokenModule } from './token/token.module';
+import { TokensModule } from './tokens/tokens.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -42,7 +42,7 @@ import { UsersModule } from './users/users.module';
     HashingModule,
     AuthModule,
     RolesModule,
-    TokenModule,
+    TokensModule,
   ],
   controllers: [AppController],
   providers: [AppService],

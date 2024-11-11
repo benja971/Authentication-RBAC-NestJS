@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { HashingService } from 'src/hashing/hashing.service';
-import { TokenService } from 'src/token/token.service';
+import { TokensService } from 'src/tokens/tokens.service';
 import { UsersService } from 'src/users/users.service';
 import { LoginUserDto } from './dto/login-auth.dto';
 import { RegisterUserDto } from './dto/register-auth.dto';
@@ -16,7 +16,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly hashingService: HashingService,
-    private readonly tokenService: TokenService,
+    private readonly tokenService: TokensService,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
