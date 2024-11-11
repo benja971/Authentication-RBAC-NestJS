@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
-    this.logger.log(`Registering user with email: ${registerUserDto.email}`);
+    this.logger.debug(`Registering user with email: ${registerUserDto.email}`);
 
     const [error, user] = await this.usersService.create(registerUserDto);
 
@@ -32,12 +32,13 @@ export class AuthService {
       access_token: await this.jwtService.signAsync({
         id: user.id,
         email: user.email,
+        roles: user.roles,
       }),
     };
   }
 
   async login(registerUserDto: LoginUserDto) {
-    this.logger.log(`Logging in user with email: ${registerUserDto.email}`);
+    this.logger.debug(`Logging in user with email: ${registerUserDto.email}`);
     const user = await this.usersService.findOneByEmail(registerUserDto.email);
 
     if (!user) {
@@ -56,6 +57,7 @@ export class AuthService {
       access_token: await this.jwtService.signAsync({
         id: result.id,
         email: result.email,
+        roles: result.roles,
       }),
     };
   }

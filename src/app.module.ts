@@ -10,6 +10,7 @@ import configuration from './config/configuration';
 import database from './config/database';
 import { HashingModule } from './hashing/hashing.module';
 import { UsersModule } from './users/users.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     HashingModule,
     AuthModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
