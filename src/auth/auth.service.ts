@@ -4,8 +4,8 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { HashingService } from 'src/hashing/hashing.service';
+import { TokenService } from 'src/token/token.service';
 import { UsersService } from 'src/users/users.service';
 import { LoginUserDto } from './dto/login-auth.dto';
 import { RegisterUserDto } from './dto/register-auth.dto';
@@ -16,7 +16,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly hashingService: HashingService,
-    private readonly jwtService: JwtService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
@@ -29,7 +29,7 @@ export class AuthService {
     }
 
     return {
-      access_token: await this.jwtService.signAsync({
+      access_token: this.tokenService.signJwtAccessToken({
         id: user.id,
         email: user.email,
         roles: user.roles,
@@ -54,7 +54,7 @@ export class AuthService {
     }
 
     return {
-      access_token: await this.jwtService.signAsync({
+      access_token: this.tokenService.signJwtAccessToken({
         id: result.id,
         email: result.email,
         roles: result.roles,

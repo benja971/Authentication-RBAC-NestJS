@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AppController } from './app.controller';
@@ -8,16 +7,18 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import database from './config/database';
+import jwt from './config/jwt';
 import { HashingModule } from './hashing/hashing.module';
-import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
+import { TokenModule } from './token/token.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env'],
       isGlobal: true,
-      load: [configuration, database],
+      load: [configuration, database, jwt],
     }),
 
     TypeOrmModule.forRootAsync({
@@ -37,23 +38,11 @@ import { RolesModule } from './roles/roles.module';
       },
     }),
 
-    JwtModule.registerAsync({
-      global: true,
-      imports: [ConfigModule],
-      inject: [ConfigService],
-
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('jwt.secret'),
-        signOptions: {
-          expiresIn: configService.get('jwt.expiresIn'),
-        },
-      }),
-    }),
-
     UsersModule,
     HashingModule,
     AuthModule,
     RolesModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
