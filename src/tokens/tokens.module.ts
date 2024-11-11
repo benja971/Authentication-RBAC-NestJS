@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { TokensService } from './tokens.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AccessTokensService } from './access_tokens.service';
+import { RefreshToken } from './entities/refresh_token.entity';
 
 @Module({
   imports: [
@@ -17,7 +19,9 @@ import { TokensService } from './tokens.service';
         },
       }),
     }),
+
+    TypeOrmModule.forFeature([RefreshToken]),
   ],
-  providers: [TokensService],
+  providers: [AccessTokensService],
 })
 export class TokensModule {}

@@ -7,6 +7,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
+import { LoginUserDto } from 'src/auth/dto/login-auth.dto';
 
 @Injectable()
 export class UsersService {
@@ -67,5 +68,18 @@ export class UsersService {
     const updatedUser = await this.rolesService.assignRoleToUser(user, role);
 
     return await this.usersRepository.save(updatedUser);
+  }
+
+  async validateCredentials(loginUserDto: LoginUserDto) {
+    this.logger.debug(`Validating credentials for user with email: ${loginUserDto.email}`);
+
+    const user = await this.findOneByEmail(loginUserDto.email);
+
+    if (!(await this.hashingService.compare(loginUserDto.password, user.password))) {
+      this.logger.warn(`Login failed for email: ${loginUserDto.email}`);
+      throw new NotFoundException(`User with email: ${loginUserDto.email} not found`);
+    }
+
+    return user;
   }
 }
