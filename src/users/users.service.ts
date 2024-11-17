@@ -77,7 +77,7 @@ export class UsersService {
 
     if (!(await this.hashingService.compare(loginUserDto.password, user.password))) {
       this.logger.warn(`Login failed for email: ${loginUserDto.email}`);
-      throw new NotFoundException(`User with email: ${loginUserDto.email} not found`);
+      throw new UnauthorizedException(`Invalid credentials`);
     }
 
     return user;
