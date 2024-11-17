@@ -31,7 +31,9 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT');
 
-  logger.verbose(`Server is running on http://localhost:${port}/api`);
+  logger.verbose(`Server is running on http://localhost:${port}`);
+
+  app.enableCors();
 
   await app.listen(port);
 }
