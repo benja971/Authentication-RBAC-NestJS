@@ -12,6 +12,8 @@ import { HashingModule } from './hashing/hashing.module';
 import { RolesModule } from './roles/roles.module';
 import { TokensModule } from './tokens/tokens.module';
 import { UsersModule } from './users/users.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     RolesModule,
     TokensModule,
+    NotificationsModule,
+    EmailsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

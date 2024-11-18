@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { Public } from './auth.guard';
 import { AuthService } from './auth.service';
+import { ConfirmEmailDto } from './dto/confirm-email.dto';
 import { LoginUserDto } from './dto/login-auth.dto';
 import { RegisterUserDto } from './dto/register-auth.dto';
 
@@ -20,5 +21,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() registerUserDto: LoginUserDto) {
     return this.authService.login(registerUserDto);
+  }
+
+  @Public()
+  @Post('confirm-email')
+  @HttpCode(HttpStatus.OK)
+  confirmEmail(@Body() { token }: ConfirmEmailDto) {
+    return this.authService.confirmEmail(token);
   }
 }

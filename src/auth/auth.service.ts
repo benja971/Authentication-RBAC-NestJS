@@ -1,7 +1,8 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { NotificationType } from 'src/notifications/notification-types.enum';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { AccessTokensService } from 'src/tokens/access_tokens.service';
 import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
-import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { LoginUserDto } from './dto/login-auth.dto';
 import { RegisterUserDto } from './dto/register-auth.dto';
@@ -13,6 +14,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly accessTokenService: AccessTokensService,
     private readonly refreshTokenService: RefreshTokensService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
@@ -26,34 +28,11 @@ export class AuthService {
       throw new ConflictException('User already exists or invalid data');
     }
 
-    // Génération des tokens
-    const { accessToken, refreshToken } = await this.generateTokens(user);
+    this.logger.debug(`User registered with ID: ${user.id}`);
 
-    // Stocker le refresh token
-    this.logger.debug(`Storing refresh token for user with email: ${registerUserDto.email}`);
-    await this.refreshTokenService.create(user.id, refreshToken);
-
-    return {
-      accessToken,
-    };
-  }
-
-  private async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
-    this.logger.debug(`Generating tokens for user with ID: ${user.id}`);
-
-    const accessToken = this.accessTokenService.signAccessToken({
-      id: user.id,
-      email: user.email,
-      roles: user.roles,
-    });
-
-    const refreshToken = this.accessTokenService.signRefreshToken({
-      id: user.id,
-      email: user.email,
-      roles: user.roles,
-    });
-
-    return { accessToken, refreshToken };
+    // envoi de l'email de confirmation
+    const notifications: NotificationType[] = [NotificationType.E_ConfirmEmail];
+    this.notificationsGateway.sendNotification(notifications, user.id);
   }
 
   async login(registerUserDto: LoginUserDto) {
@@ -73,5 +52,12 @@ export class AuthService {
     return {
       accessToken: accessToken,
     };
+  }
+
+  async confirmEmail(token: string) {
+    const user = await this.usersService.confirmEmail(token);
+
+    const notifications: NotificationType[] = [NotificationType.E_Welcome];
+    await this.notificationsGateway.sendNotification(notifications, user.id);
   }
 }
