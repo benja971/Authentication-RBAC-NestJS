@@ -11,6 +11,6 @@ export class ConfirmEmailNotificationHandler implements NotificationHandler {
   ) {}
   async sendNotification(userId: string, _message?: string): Promise<void> {
     const user = await this.usersService.findOneById(userId);
-    await this.emailsService.sendEmailConfirmation(user.confirmationToken, user.email, user.username);
+    await this.emailsService.sendEmailConfirmation(user.emailConfirmationToken, user.email, user.username);
   }
 }

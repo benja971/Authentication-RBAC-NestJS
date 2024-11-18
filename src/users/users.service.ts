@@ -24,14 +24,14 @@ export class UsersService {
       await this.findOneByEmail('admin@weaverize.com');
     } catch (error) {
       if (error instanceof NotFoundException) {
-        const confirmationToken = await this.hashingService.generateRandomToken();
+        const emailConfirmationToken = await this.hashingService.generateRandomToken();
         const password = await this.hashingService.hash('Admin@123');
 
         const user: User = this.usersRepository.create({
           email: 'admin@weaverize.com',
           password,
           roles: [Role.Admin],
-          confirmationToken,
+          emailConfirmationToken,
           username: 'admin',
           emailConfirmedAt: new Date(),
         });
@@ -49,7 +49,7 @@ export class UsersService {
     try {
       this.logger.debug(`Hashing password for user: ${user.email}`);
       user.password = await this.hashingService.hash(user.password);
-      user.confirmationToken = await this.hashingService.generateRandomToken();
+      user.emailConfirmationToken = await this.hashingService.generateRandomToken();
 
       this.logger.debug(`Saving user: ${user.email}`);
       return [null, await this.usersRepository.save(user)];
@@ -107,14 +107,14 @@ export class UsersService {
     return user;
   }
 
-  async confirmEmail(token: string) {
-    this.logger.debug(`Confirming email for user with token: ${token}`);
+  async confirmEmail(emailConfirmationToken: string) {
+    this.logger.debug(`Confirming email for user with token: ${emailConfirmationToken}`);
 
-    const user = await this.usersRepository.findOne({ where: { confirmationToken: token } });
+    const user = await this.usersRepository.findOne({ where: { emailConfirmationToken } });
 
     if (!user) {
-      this.logger.error(`User with token: ${token} not found`);
-      throw new NotFoundException(`User with token: ${token} not found`);
+      this.logger.error(`User with token: ${emailConfirmationToken} not found`);
+      throw new NotFoundException(`User with token: ${emailConfirmationToken} not found`);
     }
 
     user.emailConfirmedAt = new Date();

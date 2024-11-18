@@ -19,7 +19,7 @@ export class User {
   roles: Role[];
 
   @Column({ type: 'varchar', length: 64 })
-  confirmationToken: string ;
+  emailConfirmationToken: string;
 
   @Column({ type: 'timestamp', nullable: true })
   emailConfirmedAt: Date | null;
