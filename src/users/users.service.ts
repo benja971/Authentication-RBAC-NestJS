@@ -19,7 +19,7 @@ export class UsersService {
     private readonly rolesService: RolesService,
   ) {}
 
-  async initialize() {
+  async onModuleInit() {
     try {
       await this.findOneByEmail('admin@weaverize.com');
     } catch (error) {
