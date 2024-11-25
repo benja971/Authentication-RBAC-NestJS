@@ -18,11 +18,14 @@ export class User {
   @Column({ enum: Role, type: 'enum', array: true, default: [Role.User] })
   roles: Role[];
 
-  @Column({ type: 'varchar', length: 64 })
+  @Column({ type: 'varchar', length: 64, nullable: true })
   emailConfirmationToken: string;
 
   @Column({ type: 'timestamp', nullable: true })
   emailConfirmedAt: Date | null;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  resetPasswordToken: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

@@ -5,6 +5,7 @@ import { AssignRoleToUserDto, AssignRoleToUserParams } from 'src/roles/dto/assig
 import { Roles } from 'src/roles/roles.decorator';
 import { Role } from 'src/roles/roles.enum';
 import { RolesService } from 'src/roles/roles.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersService } from './users.service';
 import { ConfirmEmailDto } from 'src/auth/dto/confirm-email.dto';
 
@@ -31,5 +32,20 @@ export class UsersController {
     this.rolesService.assertNoSelfAssignment(userId, user.id);
 
     return this.usersService.assignRoleToUser(userId, role);
+  }
+
+  @ApiBearerAuth()
+  @Post('forgot-password')
+  async forgotPassword(@Request() request: AuthenticatedRequest) {
+    const { user } = request;
+    return this.usersService.requestPasswordReset(user.id);
+  }
+
+  @ApiBearerAuth()
+  @Patch('change-password')
+  async resetPassword(@Req() request: AuthenticatedRequest, @Body() { password, resetPasswordToken }: ChangePasswordDto) {
+    const { user } = request;
+
+    return this.usersService.updatePassword(user.id, password, resetPasswordToken);
   }
 }

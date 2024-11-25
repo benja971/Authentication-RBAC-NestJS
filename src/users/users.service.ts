@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUserDto } from 'src/auth/dto/login-auth.dto';
 import { Maybe } from 'src/commons/types';
 import { HashingService } from 'src/hashing/hashing.service';
+import { NotificationType } from 'src/notifications/notification-types.enum';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { Role } from 'src/roles/roles.enum';
 import { RolesService } from 'src/roles/roles.service';
 import { Repository } from 'typeorm';
@@ -12,11 +14,13 @@ import { User } from './entities/user.entity';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly hashingService: HashingService,
     private readonly rolesService: RolesService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async onModuleInit() {
@@ -126,6 +130,29 @@ export class UsersService {
 
     return updatedUser;
   }
+
+  async requestPasswordReset(userId: string) {
+    this.logger.debug(`Requesting password reset for user with ID: ${userId}`);
+
+    const user = await this.findOneById(userId);
+
+    user.resetPasswordToken = await this.hashingService.generateRandomToken();
+
+    return await this.usersRepository.save(user);
+  }
+
+  async updatePassword(userId: string, password: string, resetPasswordToken: string) {
+    this.logger.debug(`Updating password for user with ID: ${userId}`);
+
+    const user = await this.usersRepository.findOne({ where: { id: userId, resetPasswordToken } });
+
+    if (!user) {
+      this.logger.error(`User with ID: ${userId} and reset password token: ${resetPasswordToken} not found`);
+      throw new NotFoundException(`User with ID: ${userId} and reset password token: ${resetPasswordToken} not found`);
+    }
+
+    user.password = await this.hashingService.hash(password);
+    user.resetPasswordToken = null;
 
     return await this.usersRepository.save(user);
   }
