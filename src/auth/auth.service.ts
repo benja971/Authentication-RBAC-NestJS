@@ -53,11 +53,4 @@ export class AuthService {
       accessToken: accessToken,
     };
   }
-
-  async confirmEmail(token: string) {
-    const user = await this.usersService.confirmEmail(token);
-
-    const notifications: NotificationType[] = [NotificationType.E_Welcome];
-    await this.notificationsGateway.sendNotification(notifications, user.id);
-  }
 }
