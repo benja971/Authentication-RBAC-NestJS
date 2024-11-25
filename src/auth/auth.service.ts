@@ -32,7 +32,7 @@ export class AuthService {
 
     // envoi de l'email de confirmation
     const notifications: NotificationType[] = [NotificationType.E_ConfirmEmail];
-    this.notificationsGateway.sendNotification(notifications, user.id);
+    await this.notificationsGateway.sendNotification(notifications, user);
   }
 
   async login(registerUserDto: LoginUserDto) {

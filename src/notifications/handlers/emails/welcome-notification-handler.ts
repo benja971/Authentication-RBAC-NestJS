@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EmailsService } from 'src/emails/emails.service';
-import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/entities/user.entity';
 import { NotificationHandler } from '../../notification-handler.interface';
 
 @Injectable()
 export class WelcomeEmailNotificationHandler implements NotificationHandler {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly emailsService: EmailsService,
-  ) {}
-  async sendNotification(userId: string, _message?: string): Promise<void> {
-    const user = await this.usersService.findOneById(userId);
+  constructor(private readonly emailsService: EmailsService) {}
+  async sendNotification(user: User, _message?: string): Promise<void> {
     await this.emailsService.sendWelcomeEmail(user.email, user.username);
   }
 }

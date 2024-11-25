@@ -1,3 +1,5 @@
+import { User } from 'src/users/entities/user.entity';
+
 export interface NotificationHandler {
-  sendNotification(userId: string, message?: string): Promise<void>;
+  sendNotification(user: User, message?: string): Promise<void>;
 }

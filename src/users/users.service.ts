@@ -119,6 +119,14 @@ export class UsersService {
 
     user.emailConfirmedAt = new Date();
 
+    const updatedUser = await this.usersRepository.save(user);
+
+    const notifications: NotificationType[] = [NotificationType.E_Welcome];
+    await this.notificationsGateway.sendNotification(notifications, user);
+
+    return updatedUser;
+  }
+
     return await this.usersRepository.save(user);
   }
 }

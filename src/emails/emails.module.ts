@@ -2,10 +2,20 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { HashingService } from 'src/hashing/hashing.service';
+import { ConfirmEmailNotificationHandler } from 'src/notifications/handlers/emails/confirm-email-notification-handler';
+import { ResetPasswordEmailNotificationHandler } from 'src/notifications/handlers/emails/reset-password-notification-handler';
+import { WelcomeEmailNotificationHandler } from 'src/notifications/handlers/emails/welcome-notification-handler';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
+import { RolesService } from 'src/roles/roles.service';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { EmailsService } from './emails.service';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([User]),
     ConfigModule.forRoot(),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
@@ -36,6 +46,15 @@ import { EmailsService } from './emails.service';
       }),
     }),
   ],
-  providers: [EmailsService],
+  providers: [
+    UsersService,
+    EmailsService,
+    HashingService,
+    RolesService,
+    NotificationsGateway,
+    ConfirmEmailNotificationHandler,
+    ResetPasswordEmailNotificationHandler,
+    WelcomeEmailNotificationHandler,
+  ],
 })
 export class EmailsModule {}
