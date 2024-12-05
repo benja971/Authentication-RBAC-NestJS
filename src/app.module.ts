@@ -14,6 +14,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { EmailsModule } from './emails/emails.module';
+import { DiscussionsModule } from './discussions/discussions.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { EmailsModule } from './emails/emails.module';
     TokensModule,
     NotificationsModule,
     EmailsModule,
+    DiscussionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
