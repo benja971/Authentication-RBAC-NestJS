@@ -24,16 +24,24 @@ export class AccessTokensService {
     });
   }
 
-  verifyAccessToken(token: string): JwtPayload {
-    return this.jwtService.verify(token, {
-      secret: this.configService.get<string>('jwt.secret'),
-    });
+  verifyAccessToken(token: string): boolean {
+    try {
+      return !!this.jwtService.verify(token, {
+        secret: this.configService.get<string>('jwt.secret'),
+      });
+    } catch (error) {
+      return false;
+    }
   }
 
-  verifyRefreshToken(token: string): JwtPayload {
-    return this.jwtService.verify(token, {
-      secret: this.configService.get<string>('jwt.refreshSecret'),
-    });
+  verifyRefreshToken(token: string): boolean {
+    try {
+      return !!this.jwtService.verify<JwtPayload>(token, {
+        secret: this.configService.get<string>('jwt.refreshSecret'),
+      });
+    } catch (error) {
+      return false;
+    }
   }
 
   decodeToken(token: string): JwtPayload {
