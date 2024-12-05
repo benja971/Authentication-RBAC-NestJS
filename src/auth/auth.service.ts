@@ -32,17 +32,14 @@ export class AuthService {
 
   async login(registerUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     const user = await this.usersService.validateCredentials(registerUserDto);
-
     const refreshToken = await this.refreshTokenService.findByUserId(user.id);
-    const accessToken = this.accessTokenService.signAccessToken({ id: user.id, email: user.email, roles: user.roles });
 
-    if (!refreshToken || this.accessTokenService.verifyRefreshToken(refreshToken.token) === null) {
+    if (!this.accessTokenService.verifyRefreshToken(refreshToken.token)) {
       const newRefreshToken = this.accessTokenService.signRefreshToken({ id: user.id, email: user.email, roles: user.roles });
-      await this.refreshTokenService.create(user.id, newRefreshToken);
-    } else {
-      const rotatedToken = this.accessTokenService.signRefreshToken({ id: user.id, email: user.email, roles: user.roles });
-      await this.refreshTokenService.update(refreshToken.id, rotatedToken);
+      await this.refreshTokenService.update(refreshToken.id, newRefreshToken);
     }
+
+    const accessToken = this.accessTokenService.signAccessToken({ id: user.id, email: user.email, roles: user.roles });
 
     return {
       accessToken: accessToken,
