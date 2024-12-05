@@ -1,7 +1,6 @@
-import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUserDto } from 'src/auth/dto/login-auth.dto';
-import { Maybe } from 'src/commons/types';
 import { HashingService } from 'src/hashing/hashing.service';
 import { NotificationType } from 'src/notifications/notification-types.enum';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
@@ -45,7 +44,7 @@ export class UsersService {
     }
   }
 
-  async create(createUserDto: CreateUserDto): Promise<Maybe<User>> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     this.logger.debug(`Creating a new user: ${createUserDto.email}`);
 
     const user = this.usersRepository.create(createUserDto);
@@ -56,14 +55,20 @@ export class UsersService {
       user.emailConfirmationToken = await this.hashingService.generateRandomToken();
 
       this.logger.debug(`Saving user: ${user.email}`);
-      return [null, await this.usersRepository.save(user)];
+      return await this.usersRepository.save(user);
     } catch (error) {
       this.logger.error(`Failed to create user: ${user.email}`);
-      return [error, null];
+      this.logger.error(error);
+
+      if (error.code === '23505') {
+        throw new ConflictException('User already exists');
+      }
+
+      throw new InternalServerErrorException('Failed to create user');
     }
   }
 
-  async findOneByEmail(email: string) {
+  async findOneByEmail(email: string): Promise<User> {
     this.logger.debug(`Finding user by email: ${email}`);
 
     const user = await this.usersRepository.findOne({ where: { email } });
@@ -76,7 +81,7 @@ export class UsersService {
     return user;
   }
 
-  async findOneById(id: string) {
+  async findOneById(id: string): Promise<User> {
     this.logger.debug(`Finding user by ID: ${id}`);
 
     const user = await this.usersRepository.findOne({ where: { id } });
@@ -89,7 +94,7 @@ export class UsersService {
     return user;
   }
 
-  async assignRoleToUser(userId: string, role: Role) {
+  async assignRoleToUser(userId: string, role: Role): Promise<User> {
     this.logger.debug(`Assigning role ${role} to user with ID: ${userId}`);
 
     const user = await this.findOneById(userId);
@@ -98,7 +103,7 @@ export class UsersService {
     return await this.usersRepository.save(updatedUser);
   }
 
-  async validateCredentials(loginUserDto: LoginUserDto) {
+  async validateCredentials(loginUserDto: LoginUserDto): Promise<User> {
     this.logger.debug(`Validating credentials for user with email: ${loginUserDto.email}`);
 
     const user = await this.findOneByEmail(loginUserDto.email);
@@ -111,7 +116,7 @@ export class UsersService {
     return user;
   }
 
-  async confirmEmail(emailConfirmationToken: string) {
+  async confirmEmail(emailConfirmationToken: string): Promise<User> {
     this.logger.debug(`Confirming email for user with token: ${emailConfirmationToken}`);
 
     const user = await this.usersRepository.findOne({ where: { emailConfirmationToken } });
@@ -131,7 +136,7 @@ export class UsersService {
     return updatedUser;
   }
 
-  async requestPasswordReset(userId: string) {
+  async requestPasswordReset(userId: string): Promise<User> {
     this.logger.debug(`Requesting password reset for user with ID: ${userId}`);
 
     const user = await this.findOneById(userId);
@@ -141,7 +146,7 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async updatePassword(userId: string, password: string, resetPasswordToken: string) {
+  async updatePassword(userId: string, password: string, resetPasswordToken: string): Promise<User> {
     this.logger.debug(`Updating password for user with ID: ${userId}`);
 
     const user = await this.usersRepository.findOne({ where: { id: userId, resetPasswordToken } });

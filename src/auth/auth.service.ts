@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NotificationType } from 'src/notifications/notification-types.enum';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { AccessTokensService } from 'src/tokens/access_tokens.service';
@@ -17,16 +17,11 @@ export class AuthService {
     private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
-  async register(registerUserDto: RegisterUserDto) {
+  async register(registerUserDto: RegisterUserDto): Promise<void> {
     this.logger.debug(`Registering user with email: ${registerUserDto.email}`);
 
     // Création de l'utilisateur
-    const [error, user] = await this.usersService.create(registerUserDto);
-
-    if (error) {
-      this.logger.error(`Failed to register user: ${registerUserDto.email}`);
-      throw new ConflictException('User already exists or invalid data');
-    }
+    const user = await this.usersService.create(registerUserDto);
 
     this.logger.debug(`User registered with ID: ${user.id}`);
 
@@ -35,7 +30,7 @@ export class AuthService {
     await this.notificationsGateway.sendNotification(notifications, user);
   }
 
-  async login(registerUserDto: LoginUserDto) {
+  async login(registerUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     const user = await this.usersService.validateCredentials(registerUserDto);
 
     const refreshToken = await this.refreshTokenService.findByUserId(user.id);

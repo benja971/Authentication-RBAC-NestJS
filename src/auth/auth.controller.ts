@@ -11,14 +11,14 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() registerUserDto: RegisterUserDto) {
+  create(@Body() registerUserDto: RegisterUserDto): Promise<void> {
     return this.authService.register(registerUserDto);
   }
 
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() registerUserDto: LoginUserDto) {
+  login(@Body() registerUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     return this.authService.login(registerUserDto);
   }
 }
