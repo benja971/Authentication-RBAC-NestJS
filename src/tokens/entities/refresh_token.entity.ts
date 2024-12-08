@@ -10,8 +10,7 @@ export class RefreshToken {
   token: string;
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @Column({ type: 'uuid', unique: true })
-  userId: string;
+  user: User;
 
   @CreateDateColumn()
   createdAt: Date;

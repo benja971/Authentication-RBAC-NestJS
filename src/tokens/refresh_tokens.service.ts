@@ -43,7 +43,7 @@ export class RefreshTokensService {
   async findByUserId(userId: string): Promise<RefreshToken> {
     this.logger.verbose(`Finding refresh token for user with ID: ${userId}`);
 
-    const refreshToken = await this.refreshTokenRepository.findOne({ where: { userId } });
+    const refreshToken = await this.refreshTokenRepository.findOne({ where: { user: { id: userId } } });
 
     if (!refreshToken) {
       this.logger.error(`No refresh token found for user with ID: ${userId}`);
@@ -53,8 +53,8 @@ export class RefreshTokensService {
     return refreshToken;
   }
 
-  async deleteById(tokenId: string): Promise<void> {
-    await this.refreshTokenRepository.delete({ id: tokenId });
+  async deleteByUser(userId: string): Promise<void> {
+    await this.refreshTokenRepository.delete({ user: { id: userId } });
   }
 
   async update(tokenId: string, newToken: string): Promise<void> {
