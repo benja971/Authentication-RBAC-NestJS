@@ -1,21 +1,12 @@
 import { registerAs } from '@nestjs/config';
-
-export interface DatabaseConfig {
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  database: string;
-  type: 'postgres';
-  autoLoadEntities?: boolean;
-}
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export default registerAs(
   'database',
-  (): DatabaseConfig => ({
+  (): TypeOrmModuleOptions => ({
     type: 'postgres',
     host: process.env.DATABASE_HOST,
-    port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
+    port: parseInt(process.env.DATABASE_PORT, 10),
     database: process.env.DATABASE_NAME,
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
