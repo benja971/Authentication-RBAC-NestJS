@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { JwtPayload, JwtUserDto } from 'src/commons/types';
+import { JwtPayload, UserJwtPayload } from 'src/auth/types';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh_token.entity';
 
@@ -16,7 +16,7 @@ export class RefreshTokensService {
     private readonly jwtService: JwtService,
   ) {}
 
-  generate(payload: JwtUserDto): string {
+  generate(payload: UserJwtPayload): string {
     this.logger.debug(`Signing refresh token for user ${payload.email}`);
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.refreshSecret'),

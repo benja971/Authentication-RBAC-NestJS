@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload, JwtUserDto } from 'src/commons/types';
+import { JwtPayload, UserJwtPayload } from 'src/auth/types';
 
 @Injectable()
 export class AccessTokensService {
@@ -12,7 +12,7 @@ export class AccessTokensService {
     private readonly jwtService: JwtService,
   ) {}
 
-  generate(payload: JwtUserDto): string {
+  generate(payload: UserJwtPayload): string {
     this.logger.debug(`Signing access token for user ${payload.email}`);
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.secret'),
