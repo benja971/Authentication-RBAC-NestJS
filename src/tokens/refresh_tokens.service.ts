@@ -1,5 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtPayload, JwtUserDto } from 'src/commons/types';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh_token.entity';
 
@@ -9,7 +12,29 @@ export class RefreshTokensService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
+
+  generate(payload: JwtUserDto): string {
+    this.logger.debug(`Signing refresh token for user ${payload.email}`);
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('jwt.refreshSecret'),
+      expiresIn: this.configService.get<string>('jwt.refreshExpiresIn'),
+    });
+  }
+
+  verify(token: string): boolean {
+    this.logger.debug(`Verifying refresh token`);
+    try {
+      return !!this.jwtService.verify<JwtPayload>(token, {
+        secret: this.configService.get<string>('jwt.refreshSecret'),
+      });
+    } catch (error) {
+      this.logger.error(`Error verifying refresh token: ${error}`);
+      return false;
+    }
+  }
 
   async create(userId: string, token: string): Promise<RefreshToken> {
     return this.refreshTokenRepository.save({ userId, token: token });
