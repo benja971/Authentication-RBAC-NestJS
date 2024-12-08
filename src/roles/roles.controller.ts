@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Request } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { AuthenticatedRequest } from 'src/auth/auth.guard';
+import { AuthenticatedRequest } from 'src/auth/types';
 import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 import { UsersService } from 'src/users/users.service';
 import { AssignRoleToUserDto, AssignRoleToUserParams } from './dto/assign-role.dto';

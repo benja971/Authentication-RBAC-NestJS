@@ -1,7 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Patch, Post, Req, Request } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { AuthenticatedRequest, Public } from 'src/auth/auth.guard';
+import { Public } from 'src/auth/auth.guard';
 import { ConfirmEmailDto } from 'src/auth/dto/confirm-email.dto';
+import { AuthenticatedRequest } from 'src/auth/types';
 import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersService } from './users.service';
