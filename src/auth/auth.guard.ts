@@ -1,11 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  SetMetadata,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -24,24 +17,21 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    this.logger.verbose('Checking if user is authorized');
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
-    this.logger.debug(`isPublic: ${!!isPublic}`);
+    this.logger.log(`isPublic: ${!!isPublic}`);
 
     if (isPublic) {
+      this.logger.verbose('Public route, skipping authorization');
       return true;
     }
 
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
 
-    this.logger.debug(`${token ? 'Token found' : 'Token not found'}`);
-
     if (!token) {
-      this.logger.debug('Unauthorized');
+      this.logger.error(`Unauthorized: Token not found in header`);
       throw new UnauthorizedException();
     }
 
@@ -52,16 +42,16 @@ export class AuthGuard implements CanActivate {
 
       request['user'] = payload;
 
-      this.logger.debug('User authenticated');
+      this.logger.log(`User: ${JSON.stringify(payload)} is authorized`);
     } catch {
-      this.logger.debug('Unauthorized');
+      this.logger.error(`Unauthorized: ${token} is invalid (expired or tampered)`);
       throw new UnauthorizedException();
     }
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    this.logger.debug('Extracting token from header');
+    this.logger.verbose('Extracting token from header');
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }

@@ -18,31 +18,23 @@ export class AuthService {
   ) {}
 
   async register(registerUserDto: RegisterUserDto): Promise<void> {
-    this.logger.debug(`Registering user with email: ${registerUserDto.email}`);
+    this.logger.verbose(`Registering user with email: ${registerUserDto.email}`);
 
     // Création de l'utilisateur
     const user = await this.usersService.create(registerUserDto);
 
-    this.logger.debug(`User registered with ID: ${user.id}`);
+    this.logger.verbose(`User registered with ID: ${user.id}`);
 
     // envoi de l'email de confirmation
     const notifications: NotificationType[] = [NotificationType.E_ConfirmEmail];
     await this.notificationsGateway.sendNotification(notifications, user);
   }
 
-  async login(registerUserDto: LoginUserDto): Promise<{ accessToken: string }> {
-    const user = await this.usersService.validateCredentials(registerUserDto);
-    const refreshToken = await this.refreshTokenService.findByUserId(user.id);
-
-    if (!this.accessTokenService.verifyRefreshToken(refreshToken.token)) {
-      const newRefreshToken = this.accessTokenService.signRefreshToken({ id: user.id, email: user.email, roles: user.roles });
-      await this.refreshTokenService.update(refreshToken.id, newRefreshToken);
-    }
-
-    const accessToken = this.accessTokenService.signAccessToken({ id: user.id, email: user.email, roles: user.roles });
+  async login(loginUserSto: LoginUserDto): Promise<{ accessToken: string }> {
+    this.logger.verbose(`Login user with email: ${loginUserSto.email}`);
 
     return {
-      accessToken: accessToken,
+      accessToken: 'accessToken',
     };
   }
 }

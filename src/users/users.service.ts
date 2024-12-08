@@ -45,31 +45,30 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    this.logger.debug(`Creating a new user: ${createUserDto.email}`);
+    this.logger.log(`Creating a new user: ${createUserDto.email}`);
 
     const user = this.usersRepository.create(createUserDto);
 
     try {
-      this.logger.debug(`Hashing password for user: ${user.email}`);
       user.password = await this.hashingService.hash(user.password);
       user.emailConfirmationToken = await this.hashingService.generateRandomToken();
 
-      this.logger.debug(`Saving user: ${user.email}`);
       return await this.usersRepository.save(user);
     } catch (error) {
-      this.logger.error(`Failed to create user: ${user.email}`);
       this.logger.error(error);
 
       if (error.code === '23505') {
+        this.logger.error('User already exists');
         throw new ConflictException('User already exists');
       }
 
+      this.logger.error('Failed to create user');
       throw new InternalServerErrorException('Failed to create user');
     }
   }
 
   async findOneByEmail(email: string): Promise<User> {
-    this.logger.debug(`Finding user by email: ${email}`);
+    this.logger.log(`Finding user by email: ${email}`);
 
     const user = await this.usersRepository.findOne({ where: { email } });
 
@@ -82,7 +81,7 @@ export class UsersService {
   }
 
   async findOneById(id: string): Promise<User> {
-    this.logger.debug(`Finding user by ID: ${id}`);
+    this.logger.log(`Finding user by ID: ${id}`);
 
     const user = await this.usersRepository.findOne({ where: { id } });
 
@@ -95,7 +94,7 @@ export class UsersService {
   }
 
   async assignRoleToUser(userId: string, role: Role): Promise<User> {
-    this.logger.debug(`Assigning role ${role} to user with ID: ${userId}`);
+    this.logger.log(`Assigning role ${role} to user with ID: ${userId}`);
 
     const user = await this.findOneById(userId);
     const updatedUser = await this.rolesService.assignRoleToUser(user, role);
@@ -104,7 +103,7 @@ export class UsersService {
   }
 
   async validateCredentials(loginUserDto: LoginUserDto): Promise<User> {
-    this.logger.debug(`Validating credentials for user with email: ${loginUserDto.email}`);
+    this.logger.log(`Validating credentials for user with email: ${loginUserDto.email}`);
 
     const user = await this.findOneByEmail(loginUserDto.email);
 
@@ -117,7 +116,7 @@ export class UsersService {
   }
 
   async confirmEmail(emailConfirmationToken: string): Promise<User> {
-    this.logger.debug(`Confirming email for user with token: ${emailConfirmationToken}`);
+    this.logger.log(`Confirming email for user with token: ${emailConfirmationToken}`);
 
     const user = await this.usersRepository.findOne({ where: { emailConfirmationToken } });
 
@@ -137,7 +136,7 @@ export class UsersService {
   }
 
   async requestPasswordReset(userId: string): Promise<User> {
-    this.logger.debug(`Requesting password reset for user with ID: ${userId}`);
+    this.logger.log(`Requesting password reset for user with ID: ${userId}`);
 
     const user = await this.findOneById(userId);
 
@@ -147,7 +146,7 @@ export class UsersService {
   }
 
   async updatePassword(userId: string, password: string, resetPasswordToken: string): Promise<User> {
-    this.logger.debug(`Updating password for user with ID: ${userId}`);
+    this.logger.log(`Updating password for user with ID: ${userId}`);
 
     const user = await this.usersRepository.findOne({ where: { id: userId, resetPasswordToken } });
 

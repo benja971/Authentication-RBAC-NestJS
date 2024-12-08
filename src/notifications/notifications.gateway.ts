@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { ConfirmEmailNotificationHandler } from './handlers/emails/confirm-email-notification-handler';
 import { ResetPasswordEmailNotificationHandler } from './handlers/emails/reset-password-notification-handler';
@@ -8,6 +8,7 @@ import { NotificationType } from './notification-types.enum';
 
 @Injectable()
 export class NotificationsGateway {
+  private readonly logger = new Logger(NotificationsGateway.name);
   private readonly handlers: Map<NotificationType, NotificationHandler> = new Map();
 
   constructor(
@@ -24,9 +25,11 @@ export class NotificationsGateway {
     const handlers = type.map((t) => this.handlers.get(t)).filter((handler) => handler);
 
     if (handlers.length === 0) {
+      this.logger.error('Handler not found');
       throw new NotFoundException('Handler not found');
     }
 
+    this.logger.log(`Sending notification to ${user.email} with message: ${message}`);
     await Promise.all(handlers.map((handler) => handler.sendNotification(user, message)));
   }
 }

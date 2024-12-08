@@ -1,6 +1,6 @@
 // src/shared/email.service.ts
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,10 +13,10 @@ export class EmailsService {
   ) {}
 
   async sendResetPasswordEmail(token: string, email: string, username: string): Promise<void> {
+    this.logger.log('Sending email (reset password)');
+
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
     const url = `${frontendUrl}/reset-password?token=${token}`;
-
-    this.logger.debug('Sending email (reset password)');
 
     try {
       await this.mailerService.sendMail({
@@ -26,16 +26,16 @@ export class EmailsService {
         context: { name: username, url },
       });
     } catch (error) {
-      this.logger.error('Failed to send reset password email', error.stack);
-      throw new Error('Unable to send reset password email');
+      this.logger.error('Failed to send reset password email');
+      throw new InternalServerErrorException('Unable to send reset password email');
     }
   }
 
   async sendEmailConfirmation(token: string, email: string, username: string): Promise<void> {
+    this.logger.log('Sending email (confirm email)');
+
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
     const url = `${frontendUrl}/confirm-account?token=${token}`;
-
-    this.logger.debug('Sending email (confirm email)');
 
     try {
       await this.mailerService.sendMail({
@@ -45,13 +45,13 @@ export class EmailsService {
         context: { name: username, url },
       });
     } catch (error) {
-      this.logger.error('Failed to send confirmation email', error.stack);
-      throw new Error('Unable to send confirmation email');
+      this.logger.error('Failed to send confirmation email');
+      throw new InternalServerErrorException('Unable to send confirmation email');
     }
   }
 
   async sendWelcomeEmail(email: string, username: string): Promise<void> {
-    this.logger.debug('Sending email (welcome)');
+    this.logger.log('Sending email (welcome)');
 
     const appUrl = this.configService.get<string>('FRONTEND_URL');
 
@@ -63,8 +63,8 @@ export class EmailsService {
         context: { name: username, appUrl },
       });
     } catch (error) {
-      this.logger.error('Failed to send welcome email', error.stack);
-      throw new Error('Unable to send welcome email');
+      this.logger.error('Failed to send welcome email');
+      throw new InternalServerErrorException('Unable to send welcome email');
     }
   }
 }
