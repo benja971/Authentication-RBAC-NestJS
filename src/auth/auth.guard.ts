@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'src/commons/types';
+import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 
 export type AuthenticatedRequest = Request & { user: JwtPayload };
 
@@ -13,6 +14,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly refreshTokenService: RefreshTokensService,
     private readonly reflector: Reflector,
   ) {}
 
@@ -20,7 +22,7 @@ export class AuthGuard implements CanActivate {
     this.logger.verbose('Checking if user is authorized');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
-    this.logger.log(`isPublic: ${!!isPublic}`);
+    this.logger.debug(`isPublic: ${!!isPublic}`);
 
     if (isPublic) {
       this.logger.verbose('Public route, skipping authorization');
@@ -39,6 +41,14 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: this.configService.get('jwt.secret'),
       });
+
+      // if no refresh token, access token can't be used
+      const refreshToken = await this.refreshTokenService.findByUserId(payload.id);
+
+      if (!refreshToken) {
+        this.logger.error(`Unauthorized: Refresh token not found in cookie`);
+        throw new UnauthorizedException(`No refresh token found for user: ${payload.id}`);
+      }
 
       request['user'] = payload;
 
