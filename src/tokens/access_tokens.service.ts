@@ -13,7 +13,7 @@ export class AccessTokensService {
   ) {}
 
   generate(payload: UserJwtPayload): string {
-    this.logger.debug(`Signing access token for user ${payload.email}`);
+    this.logger.log(`Signing access token for user ${payload.email}`);
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.secret'),
       expiresIn: this.configService.get<string>('jwt.expiresIn'),
@@ -21,7 +21,7 @@ export class AccessTokensService {
   }
 
   verify(token: string): boolean {
-    this.logger.debug(`Verifying access token`);
+    this.logger.log(`Verifying access token`);
     try {
       return !!this.jwtService.verify<JwtPayload>(token, {
         secret: this.configService.get<string>('jwt.secret'),
@@ -33,7 +33,7 @@ export class AccessTokensService {
   }
 
   decode(token: string): JwtPayload {
-    this.logger.debug(`Decoding access token`);
+    this.logger.log(`Decoding access token`);
     return this.jwtService.decode<JwtPayload>(token);
   }
 }

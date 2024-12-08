@@ -17,7 +17,7 @@ export class RefreshTokensService {
   ) {}
 
   generate(payload: UserJwtPayload): string {
-    this.logger.debug(`Signing refresh token for user ${payload.email}`);
+    this.logger.log(`Signing refresh token for user ${payload.email}`);
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('jwt.refreshSecret'),
       expiresIn: this.configService.get<string>('jwt.refreshExpiresIn'),
@@ -25,7 +25,7 @@ export class RefreshTokensService {
   }
 
   verify(token: string): boolean {
-    this.logger.debug(`Verifying refresh token`);
+    this.logger.log(`Verifying refresh token`);
     try {
       return !!this.jwtService.verify<JwtPayload>(token, {
         secret: this.configService.get<string>('jwt.refreshSecret'),
