@@ -33,8 +33,18 @@ export class AuthService {
   async login(loginUserSto: LoginUserDto): Promise<{ accessToken: string }> {
     this.logger.verbose(`Login user with email: ${loginUserSto.email}`);
 
+    // Vérification des informations de connexion
+    const user = await this.usersService.validateCredentials(loginUserSto);
+
+    // Génération des tokens
+    const accessToken = this.accessTokenService.generate(user);
+    const refreshToken = this.refreshTokenService.generate(user);
+
+    // Sauvegarde du refresh token
+    await this.refreshTokenService.create(user.id, refreshToken);
+
     return {
-      accessToken: 'accessToken',
+      accessToken,
     };
   }
 }

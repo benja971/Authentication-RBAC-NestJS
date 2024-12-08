@@ -22,7 +22,7 @@ export class UsersService {
     private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
-  async onModuleInit() {
+  private async onModuleInit() {
     try {
       await this.findOneByEmail('admin@weaverize.com');
     } catch (error) {
