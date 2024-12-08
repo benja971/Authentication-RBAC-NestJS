@@ -8,5 +8,5 @@ export class AssignRoleToUserDto {
 
 export class AssignRoleToUserParams {
   @ApiProperty()
-  userId: string;
+  targetUserId: string;
 }
