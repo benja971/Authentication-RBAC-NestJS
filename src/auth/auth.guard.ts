@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     this.logger.verbose('Checking if user is authorized');
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
 
-    this.logger.debug(`isPublic: ${!!isPublic}`);
+    this.logger.debug(`isPublic: ${isPublic}`);
 
     if (isPublic) {
       this.logger.verbose('Public route, skipping authorization');
