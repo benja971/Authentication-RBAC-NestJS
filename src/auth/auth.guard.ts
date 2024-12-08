@@ -31,7 +31,13 @@ export class AuthGuard implements CanActivate {
     }
 
     // Extract token and request
-    const { token, request } = this.extractRequestAndToken(context);
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const token = this.extractTokenFromHeader(request);
+
+    if (!token) {
+      this.logger.error('Unauthorized: Token not found in the header');
+      throw new UnauthorizedException('Authorization token is missing.');
+    }
 
     // Authenticate the request
     return this.authenticateRequest(token, request);
@@ -63,18 +69,6 @@ export class AuthGuard implements CanActivate {
       this.logger.error(`Authentication failed: ${error.message}`);
       throw new UnauthorizedException('Invalid or expired token.');
     }
-  }
-
-  private extractRequestAndToken(context: ExecutionContext): { token: string; request: AuthenticatedRequest } {
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = this.extractTokenFromHeader(request);
-
-    if (!token) {
-      this.logger.error('Unauthorized: Token not found in the header');
-      throw new UnauthorizedException('Authorization token is missing.');
-    }
-
-    return { token, request };
   }
 
   private extractTokenFromHeader(request: Request): string {
