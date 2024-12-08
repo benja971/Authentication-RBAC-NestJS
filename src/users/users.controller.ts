@@ -2,12 +2,16 @@ import { Body, Controller, HttpCode, HttpStatus, Patch, Post, Req, Request } fro
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthenticatedRequest, Public } from 'src/auth/auth.guard';
 import { ConfirmEmailDto } from 'src/auth/dto/confirm-email.dto';
+import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly refreshTokensService: RefreshTokensService,
+  ) {}
 
   @Public()
   @Post('confirm-email')
@@ -18,6 +22,7 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
   async forgotPassword(@Request() request: AuthenticatedRequest) {
     const { user } = request;
     return this.usersService.requestPasswordReset(user.id);
@@ -25,9 +30,13 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Patch('change-password')
-  async resetPassword(@Req() request: AuthenticatedRequest, @Body() { password, resetPasswordToken }: ChangePasswordDto) {
-    const { user } = request;
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Req() { user }: AuthenticatedRequest, @Body() { password, resetPasswordToken }: ChangePasswordDto) {
+    const updatedUser = await this.usersService.updatePassword(user.id, password, resetPasswordToken);
 
-    return this.usersService.updatePassword(user.id, password, resetPasswordToken);
+    // revoke refresh token to prevent further access with the old password
+    await this.refreshTokensService.deleteByUser(user.id);
+
+    return updatedUser;
   }
 }
