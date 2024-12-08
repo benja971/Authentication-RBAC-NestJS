@@ -1,5 +1,4 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { JwtUserDto } from 'src/commons/types';
 import { NotificationType } from 'src/notifications/notification-types.enum';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { AccessTokensService } from 'src/tokens/access_tokens.service';
@@ -7,6 +6,7 @@ import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 import { UsersService } from 'src/users/users.service';
 import { LoginUserDto } from './dto/login-auth.dto';
 import { RegisterUserDto } from './dto/register-auth.dto';
+import { UserJwtPayload } from './types';
 
 @Injectable()
 export class AuthService {
@@ -56,7 +56,7 @@ export class AuthService {
     await this.refreshTokenService.deleteByUser(userId);
   }
 
-  async refresh(jwtUserDto: JwtUserDto): Promise<{ accessToken: string }> {
+  async refresh(jwtUserDto: UserJwtPayload): Promise<{ accessToken: string }> {
     this.logger.verbose(`Refresh token for user with ID: ${jwtUserDto.id}`);
 
     // Récupération du refresh token

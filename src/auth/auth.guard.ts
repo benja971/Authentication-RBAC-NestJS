@@ -1,11 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { JwtPayload } from 'src/commons/types';
 import { AccessTokensService } from 'src/tokens/access_tokens.service';
 import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
-
-export type AuthenticatedRequest = Request & { user: JwtPayload };
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -29,7 +26,7 @@ export class AuthGuard implements CanActivate {
     }
 
     // Extract token and request
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -41,7 +38,7 @@ export class AuthGuard implements CanActivate {
     return this.authenticateRequest(token, request);
   }
 
-  private async authenticateRequest(token: string, request: AuthenticatedRequest): Promise<boolean> {
+  private async authenticateRequest(token: string, request: Request): Promise<boolean> {
     try {
       // Verify the JWT token
       if (!this.accessTokenService.verify(token)) {
@@ -63,7 +60,7 @@ export class AuthGuard implements CanActivate {
       }
 
       // Attach the user payload to the request object
-      request.user = payload;
+      request['user'] = payload;
 
       this.logger.log(`User ${payload.id} is authorized`);
       return true;
