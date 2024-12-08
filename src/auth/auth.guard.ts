@@ -1,7 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, SetMetadata, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'src/commons/types';
 import { AccessTokensService } from 'src/tokens/access_tokens.service';
@@ -14,8 +12,6 @@ export class AuthGuard implements CanActivate {
   private readonly logger = new Logger(AuthGuard.name);
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
     private readonly accessTokenService: AccessTokensService,
     private readonly refreshTokenService: RefreshTokensService,
     private readonly reflector: Reflector,
