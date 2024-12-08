@@ -7,12 +7,14 @@ import { ResetPasswordEmailNotificationHandler } from 'src/notifications/handler
 import { WelcomeEmailNotificationHandler } from 'src/notifications/handlers/emails/welcome-notification-handler';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { RolesService } from 'src/roles/roles.service';
+import { RefreshToken } from 'src/tokens/entities/refresh_token.entity';
+import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 import { User } from './entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, RefreshToken])],
   controllers: [UsersController],
   providers: [
     UsersService,
@@ -23,6 +25,7 @@ import { UsersService } from './users.service';
     ConfirmEmailNotificationHandler,
     ResetPasswordEmailNotificationHandler,
     WelcomeEmailNotificationHandler,
+    RefreshTokensService,
   ],
 })
 export class UsersModule {}
