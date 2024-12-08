@@ -4,6 +4,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'src/commons/types';
+import { AccessTokensService } from 'src/tokens/access_tokens.service';
 import { RefreshTokensService } from 'src/tokens/refresh_tokens.service';
 
 export type AuthenticatedRequest = Request & { user: JwtPayload };
@@ -15,6 +16,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly accessTokenService: AccessTokensService,
     private readonly refreshTokenService: RefreshTokensService,
     private readonly reflector: Reflector,
   ) {}
@@ -46,9 +48,13 @@ export class AuthGuard implements CanActivate {
   private async authenticateRequest(token: string, request: AuthenticatedRequest): Promise<boolean> {
     try {
       // Verify the JWT token
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.get<string>('jwt.secret'),
-      });
+      if (!this.accessTokenService.verify(token)) {
+        this.logger.error('Unauthorized: Invalid token');
+        throw new UnauthorizedException('Invalid or expired token. Please log in again.');
+      }
+
+      // Decode the token payload
+      const payload = this.accessTokenService.decode(token);
 
       this.logger.verbose(`Token verified successfully for user: ${payload.id}`);
 
